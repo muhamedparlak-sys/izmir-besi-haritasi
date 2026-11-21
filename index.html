@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İzmir Besi Çiftliği Yer Seçimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --zemin: #f4f1ea;
+    --panel: #fffdf8;
+    --metin: #1f2a1f;
+    --soluk: #5f6b5c;
+    --cizgi: #ddd6c6;
+    --a: #1d6b38;
+    --b: #8cc56f;
+    --sit: #c8463c;
+    --ova: #e7b622;
+    --kiyi: #3b7fc4;
+    --elk: #7a3cc4;
+    --vurgu: #b0532a;
+    --golge: 0 6px 24px rgba(40, 35, 20, .16);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: "IBM Plex Sans", system-ui, sans-serif; color: var(--metin); background: var(--zemin); }
+  #harita { position: absolute; inset: 0; }
+  .panel {
+    position: absolute; top: 12px; left: 12px; z-index: 1000; width: 340px; max-height: calc(100% - 24px);
+    overflow: auto; background: var(--panel); border: 1px solid var(--cizgi); border-radius: 10px; box-shadow: var(--golge);
+  }
+  .panel header { padding: 16px 18px 12px; border-bottom: 1px solid var(--cizgi); }
+  .ust-etiket { font: 500 11px/1 "IBM Plex Mono", monospace; letter-spacing: .08em; color: var(--vurgu); text-transform: uppercase; }
+  h1 { font-size: 20px; line-height: 1.2; margin: 6px 0 4px; font-weight: 600; }
+  .alt { font-size: 13px; color: var(--soluk); margin: 0; }
+  .bolum { padding: 12px 18px; border-bottom: 1px solid var(--cizgi); }
+  .bolum h2 { font-size: 12px; font-weight: 600; margin: 0 0 8px; color: var(--soluk); text-transform: uppercase; letter-spacing: .05em; }
+  .sayilar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sayi { background: var(--zemin); border-radius: 8px; padding: 8px 10px; }
+  .sayi b { display: block; font-size: 22px; font-weight: 600; }
+  .sayi span { font-size: 12px; color: var(--soluk); }
+  label.satir { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 4px 0; cursor: pointer; }
+  label.satir input { accent-color: var(--a); width: 16px; height: 16px; }
+  .renk { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .renk.cizgi { height: 3px; border-radius: 2px; }
+  .kucuk { font-size: 12px; color: var(--soluk); }
+  select, input[type=range] { width: 100%; font: inherit; font-size: 14px; }
+  select { padding: 6px 8px; border: 1px solid var(--cizgi); border-radius: 6px; background: #fff; }
+  .alan-satir { display: flex; justify-content: space-between; font-size: 13px; margin-top: 10px; }
+  details summary { cursor: pointer; font-size: 14px; font-weight: 500; }
+  details ul { padding-left: 18px; margin: 8px 0 0; font-size: 13px; line-height: 1.5; }
+  .uyari { background: #fbf0e6; border-left: 3px solid var(--vurgu); padding: 8px 10px; font-size: 12.5px; line-height: 1.45; border-radius: 4px; }
+  .kapat { display: none; }
+  .leaflet-popup-content { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; margin: 12px 14px; min-width: 230px; }
+  .pop h3 { margin: 0 0 2px; font-size: 15px; }
+  .pop .rozet { display: inline-block; font: 500 11px "IBM Plex Mono", monospace; padding: 2px 6px; border-radius: 4px; color: #fff; }
+  .pop table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  .pop td { padding: 2px 0; border-bottom: 1px dotted var(--cizgi); }
+  .pop td:last-child { text-align: right; font-family: "IBM Plex Mono", monospace; }
+  .pop .baglanti { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pop .baglanti a { font-size: 12px; padding: 4px 8px; border-radius: 5px; background: var(--zemin); color: var(--metin); text-decoration: none; border: 1px solid var(--cizgi); }
+  .pop .baglanti a:hover { border-color: var(--a); color: var(--a); }
+  .ac-dugme {
+    display: none; position: absolute; z-index: 1001; left: 12px; top: 12px; padding: 10px 14px; border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--cizgi); box-shadow: var(--golge); font: 600 14px "IBM Plex Sans", sans-serif;
+  }
+  @media (max-width: 640px) {
+    .panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 62%; border-radius: 14px 14px 0 0; }
+    .panel.gizli { display: none; }
+    .ac-dugme { display: block; top: auto; bottom: 16px; left: 16px; }
+    .panel:not(.gizli) ~ .ac-dugme { display: none; }
+    .kapat { display: block; float: right; border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--soluk); }
+  }
+</style>
+</head>
+<body>
+<div id="harita"></div>
+
+<aside class="panel" id="panel">
+  <header>
+    <button class="kapat" onclick="panelGoster(false)" aria-label="Paneli kapat">×</button>
+    <div class="ust-etiket">İzmir · ön eleme haritası</div>
+    <h1>Besi çiftliği için aday alanlar</h1>
+    <p class="alt">Ova, kıyı ve sit alanları dışında; resmî yola ve elektriğe yakın tarım arazileri.</p>
+  </header>
+
+  <div class="bolum">
+    <div class="sayilar">
+      <div class="sayi"><b id="sayiAday">–</b><span>görünen aday alan</span></div>
+      <div class="sayi"><b id="sayiHa">–</b><span>toplam hektar</span></div>
+    </div>
+  </div>
+
+  <div class="bolum">
+    <h2>Süz</h2>
+    <select id="ilce" aria-label="İlçe"><option value="">Tüm ilçeler</option></select>
+    <div class="alan-satir"><span>En küçük alan</span><b id="minHaYazi">3 ha</b></div>
+    <input type="range" id="minHa" min="3" max="100" step="1" value="3" aria-label="En küçük alan (hektar)">
+  </div>
+
+  <div class="bolum">
+    <h2>Katmanlar</h2>
+    <label class="satir"><input type="checkbox" data-k="A" checked><span class="renk" style="background:var(--a)"></span>A — yol ve elektrik çok yakın</label>
+    <label class="satir"><input type="checkbox" data-k="B" checked><span class="renk" style="background:var(--b)"></span>B — yol yakın, elektrik orta mesafe</label>
+    <label class="satir"><input type="checkbox" data-k="sit" checked><span class="renk" style="background:var(--sit);opacity:.55"></span>Sit ve koruma alanları</label>
+    <label class="satir"><input type="checkbox" data-k="ova" checked><span class="renk" style="background:var(--ova);opacity:.6"></span>Olası büyük ova / sulama alanı</label>
+    <label class="satir"><input type="checkbox" data-k="kiyi" checked><span class="renk" style="background:var(--kiyi);opacity:.5"></span>Kıyı bandı (300 m)</label>
+    <label class="satir"><input type="checkbox" data-k="elektrik" checked><span class="renk cizgi" style="background:var(--elk)"></span>Enerji hatları ve trafo merkezleri</label>
+    <label class="satir"><input type="checkbox" data-k="cdp"><span class="renk" style="background:linear-gradient(135deg,#e9ffde 50%,#9bd37f 50%)"></span>Çevre Düzeni Planı (canlı, Bakanlık)</label>
+    <label class="satir"><input type="checkbox" data-k="ilce" checked><span class="renk cizgi" style="background:#555"></span>İlçe sınırları</label>
+  </div>
+
+  <div class="bolum">
+    <details>
+      <summary>Nasıl seçildi?</summary>
+      <ul>
+        <li><b>Dışarıda bırakılan:</b> sit, tabiat ve yaban hayatı koruma alanları; olası büyük ovalar ve DSİ sulama alanları; kıyıdan 300 m; yerleşim alanları ve 300 m çevresi; göl/baraj ve 100 m çevresi; yüksek gerilim hattı altı (40 m); eğimi %15'ten fazla yerler; Çevre Düzeni Planı'nda tarım arazisi olmayan her yer (orman, mera, sanayi vb.).</li>
+        <li><b>Yol:</b> haritalı resmî yola (köy yolu ve üstü; tarla yolu hariç) en çok 250 m.</li>
+        <li><b>Elektrik A:</b> OG hattına ≤500 m, trafo merkezine ≤3 km ya da köye ≤1 km. <b>B:</b> sırasıyla 1,5 km / 6 km / 2 km.</li>
+        <li>Alana tıklayınca mesafeler, eğim ve kot görünür.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="bolum">
+    <div class="uyari">
+      Bu bir <b>ön eleme</b> haritasıdır, parsel kararı değildir. Büyük ova sınırları resmî olarak yayımlanmadığı için yüzey şekli ve sulama alanlarından <b>tahmin</b> edildi. Kıyı kenar çizgisi ve sit sınırları yaklaşık. OG elektrik hatları haritada eksik olabilir. Parsel almadan önce TKGM parsel sorgu, il tarım müdürlüğü (büyük ova ve toprak koruma) ve belediye imar görüşü ile doğrulayın.
+    </div>
+    <p class="kucuk">Kaynak: Çevre ve Şehircilik Bak. İzmir-Manisa 1/100.000 ÇDP (TUCBS), tabiat varlıkları sit verisi, OpenStreetMap katkıcıları, Copernicus DEM. Hazırlanma: Kasım 2026.</p>
+  </div>
+</aside>
+<button class="ac-dugme" onclick="panelGoster(true)">☰ Süz ve katmanlar</button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="harita.js?v=3"></script>
+</body>
+</html>

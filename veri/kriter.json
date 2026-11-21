@@ -1,0 +1,22 @@
+{
+ "kiyi_bandi_m": 300,
+ "yerlesim_tampon_m": 300,
+ "yg_bandi_m": 40,
+ "gol_tampon_m": 100,
+ "max_egim_yuzde": 15,
+ "ova_egim_yuzde": 2,
+ "ova_max_kot_m": 250,
+ "ova_min_km2": 15,
+ "yol_m": 250,
+ "elk_iyi": {
+  "og_m": 500,
+  "tm_m": 3000,
+  "koy_m": 1000
+ },
+ "elk_orta": {
+  "og_m": 1500,
+  "tm_m": 6000,
+  "koy_m": 2000
+ },
+ "min_alan_ha": 3
+}
