@@ -58,8 +58,72 @@ function adayPopup(p, latlng) {
 const NEON = { A: "#39ff14", B: "#00f0ff" };
 harita.createPane("neon").style.zIndex = 450;
 const neonCizici = L.svg({ padding: 0.5, pane: "neon" });   // CSS animasyonu için ayrı SVG katmanı
+harita.createPane("ilcePane").style.zIndex = 440;   // koyu katmanın üstü, neon adayların altı
+const ilceCizici = L.svg({ pane: "ilcePane" });
 let adayVeri = null;
+let ilceAna = null;   // ilçe poligonları (stil + yakınlaşma için)
 const adayKatman = { A: L.layerGroup(), B: L.layerGroup() };
+
+/* Kapatılan ilçeler: tarayıcıda hatırlanır, bağlantıyla da paylaşılabilir (#gizle=Buca,Tire) */
+const gizli = new Set(gizliOku());
+
+function gizliOku() {
+  const h = new URLSearchParams(location.hash.slice(1)).get("gizle");
+  if (h) return h.split(",").filter(Boolean);
+  try { return JSON.parse(localStorage.getItem("gizliIlceler") || "[]"); } catch { return []; }
+}
+
+function gizliYaz() {
+  const liste = [...gizli];
+  try { localStorage.setItem("gizliIlceler", JSON.stringify(liste)); } catch { /* özel pencere */ }
+  history.replaceState(null, "", liste.length ? `#gizle=${liste.join(",")}` : location.pathname + location.search);
+}
+
+function ilceStili(f) {
+  const kapali = gizli.has(f.properties.ad);
+  return {
+    color: kapali ? "#000" : "#fff", weight: kapali ? 1 : 2.2, opacity: 0.9,
+    fill: kapali, fillColor: "#0b0b0b", fillOpacity: 0.82, interactive: false,
+  };
+}
+
+function ilceGuncelle() {
+  ilceAna?.setStyle(ilceStili);
+  katman.ilceIc?.setStyle({ color: "#222", weight: 1, dashArray: "5 4", fill: false, interactive: false });
+  document.querySelectorAll("#ilceListe input").forEach((cb) => { cb.checked = !gizli.has(cb.value); });
+  gizliYaz();
+  adaylariCiz();
+}
+
+function ilceListesiKur(ilceGeo, aday) {
+  const sayilar = {};
+  for (const f of aday.features) sayilar[f.properties.ilce] = (sayilar[f.properties.ilce] || 0) + 1;
+  const adlar = ilceGeo.features.map((f) => f.properties.ad).sort((a, b) => a.localeCompare(b, "tr"));
+  const kutu = document.getElementById("ilceListe");
+  kutu.innerHTML = "";
+  for (const ad of adlar) {
+    const n = sayilar[ad] || 0;
+    const etiket = document.createElement("label");
+    etiket.className = "ilce-satir" + (n ? "" : " bos");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = ad;
+    cb.checked = !gizli.has(ad);
+    cb.addEventListener("change", () => { if (cb.checked) gizli.delete(ad); else gizli.add(ad); ilceGuncelle(); });
+    const yazi = document.createElement("span");
+    yazi.textContent = ad;
+    const sayiEl = document.createElement("small");
+    sayiEl.textContent = n ? String(n) : "–";
+    etiket.append(cb, yazi, sayiEl);
+    kutu.append(etiket);
+  }
+  document.getElementById("ilceHepsi").onclick = () => { gizli.clear(); ilceGuncelle(); };
+  document.getElementById("ilceHicbiri").onclick = () => { adlar.forEach((a) => gizli.add(a)); ilceGuncelle(); };
+  document.getElementById("ilceBos").onclick = () => {
+    adlar.forEach((a) => { if (!sayilar[a]) gizli.add(a); });
+    ilceGuncelle();
+  };
+}
 
 function adaylariCiz() {
   const ilce = document.getElementById("ilce").value;
@@ -69,7 +133,7 @@ function adaylariCiz() {
   adayKatman.A.clearLayers();
   adayKatman.B.clearLayers();
   const secili = adayVeri.features.filter(
-    (f) => (!ilce || f.properties.ilce === ilce) && f.properties.alan_ha >= minHa,
+    (f) => (!ilce || f.properties.ilce === ilce) && !gizli.has(f.properties.ilce) && f.properties.alan_ha >= minHa,
   );
   for (const f of secili) {
     const s = f.properties.sinif;
@@ -93,11 +157,11 @@ function adaylariCiz() {
 function ilceyeGit() {
   const secili = adaylariCiz();
   const ilce = document.getElementById("ilce").value;
-  if (ilce && katman.ilce) {
-    katman.ilce.eachLayer((l) => {
+  if (ilce && ilceAna) {
+    ilceAna.eachLayer((l) => {
       if (l.feature.properties.ad === ilce) harita.fitBounds(l.getBounds(), kenarPayi());
     });
-  } else if (!ilce && katman.ilce) {
+  } else if (!ilce && ilceAna) {
     tumIzmir();
   }
 }
@@ -108,7 +172,7 @@ function kenarPayi() {
 }
 
 function tumIzmir() {
-  harita.fitBounds(katman.ilce.getBounds(), kenarPayi());
+  harita.fitBounds(ilceAna.getBounds(), kenarPayi());
 }
 
 async function yukle(ad) {
@@ -129,9 +193,21 @@ async function basla() {
     const alanStil = (renk, op) => ({ color: renk, weight: 0.8, fillColor: renk, fillOpacity: op, interactive: true });
     const etiketli = (f, l) => l.bindTooltip(f.properties.ad, { sticky: true });
 
+    // İlçe sınırı: beyaz hale + üstünde kesikli koyu çizgi; kapalı ilçe siyaha boyanır
     katman.ilce = L.geoJSON(ilce, {
-      style: { color: "#555", weight: 1, fill: false, dashArray: "4 3", interactive: false },
+      renderer: ilceCizici,
+      style: ilceStili,
+      onEachFeature: (f, l) => l.bindTooltip(f.properties.ad, {
+        permanent: true, direction: "center", className: "ilce-ad", interactive: false,
+      }),
     });
+    katman.ilceIc = L.geoJSON(ilce, {
+      renderer: ilceCizici,
+      style: { color: "#222", weight: 1, dashArray: "5 4", fill: false, interactive: false },
+    });
+    ilceAna = katman.ilce;
+    katman.ilce = L.layerGroup([ilceAna, katman.ilceIc]);
+    ilceListesiKur(ilce, aday);
     katman.ova = L.geoJSON(ova, { style: alanStil(RENK.ova, 0.35), onEachFeature: etiketli });
     katman.kiyi = L.geoJSON(kiyi, { style: alanStil(RENK.kiyi, 0.25), onEachFeature: etiketli });
     katman.sit = L.geoJSON(sit, { style: alanStil(RENK.sit, 0.3), onEachFeature: etiketli });
@@ -166,13 +242,19 @@ async function basla() {
       });
     });
     katmanSirasi();
-    adaylariCiz();
+    ilceGuncelle();
     tumIzmir();
+    etiketGorunurlugu();
   } catch (hata) {
     document.getElementById("sayiAday").textContent = "!";
     alert(`Veri yüklenemedi: ${hata.message}`);
   }
 }
+
+function etiketGorunurlugu() {
+  document.getElementById("harita").classList.toggle("uzak", harita.getZoom() < 9);
+}
+harita.on("zoomend", etiketGorunurlugu);
 
 function katmanSirasi() {
   ["kotu", "ova", "kiyi", "sit", "elektrik", "B", "A"].forEach((k) => {

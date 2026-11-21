@@ -72,6 +72,24 @@
   @media (prefers-reduced-motion: reduce) {
     .leaflet-neon-pane { animation: none; }
   }
+  .ilce-dugmeler { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .ilce-dugmeler button {
+    font: 500 12px "IBM Plex Sans", sans-serif; padding: 5px 9px; border-radius: 6px; cursor: pointer;
+    background: var(--zemin); border: 1px solid var(--cizgi); color: var(--metin);
+  }
+  .ilce-dugmeler button:hover { border-color: var(--a); color: var(--a); }
+  .ilce-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+  .ilce-satir { display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 3px 0; cursor: pointer; }
+  .ilce-satir input { accent-color: var(--a); margin: 0; }
+  .ilce-satir span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ilce-satir small { font: 500 11px "IBM Plex Mono", monospace; color: var(--a); }
+  .ilce-satir.bos { color: var(--soluk); }
+  .ilce-satir.bos small { color: var(--soluk); }
+  .leaflet-tooltip.ilce-ad {
+    background: none; border: 0; box-shadow: none; padding: 0; color: #111;
+    font: 600 12px "IBM Plex Sans", sans-serif; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
+  }
+  .uzak .leaflet-tooltip.ilce-ad { display: none; }
   .renk.neon-A { background: #39ff14; box-shadow: 0 0 6px #39ff14; }
   .renk.neon-B { background: #00f0ff; box-shadow: 0 0 6px #00f0ff; }
   .ac-dugme {
@@ -107,9 +125,20 @@
 
   <div class="bolum">
     <h2>Süz</h2>
-    <select id="ilce" aria-label="İlçe"><option value="">Tüm ilçeler</option></select>
+    <select id="ilce" aria-label="İlçeye git"><option value="">Tüm ilçeler (yakınlaş)</option></select>
     <div class="alan-satir"><span>En küçük alan</span><b id="minHaYazi">3 ha</b></div>
     <input type="range" id="minHa" min="3" max="100" step="1" value="3" aria-label="En küçük alan (hektar)">
+  </div>
+
+  <div class="bolum">
+    <h2>İlçeler — istemediğini kapat</h2>
+    <div class="ilce-dugmeler">
+      <button type="button" id="ilceHepsi">Hepsini aç</button>
+      <button type="button" id="ilceHicbiri">Hepsini kapat</button>
+      <button type="button" id="ilceBos">Adaysızları kapat</button>
+    </div>
+    <div id="ilceListe" class="ilce-liste"></div>
+    <p class="kucuk" style="margin:6px 0 0">Kapattığın ilçe siyaha boyanır, adayları gizlenir. Seçimin bu tarayıcıda hatırlanır; adres çubuğundaki bağlantıyı paylaşırsan aynı görünüm açılır. Sayı = aday alan.</p>
   </div>
 
   <div class="bolum">
@@ -131,7 +160,7 @@
     <label class="satir"><input type="checkbox" data-k="kiyi" checked><span class="renk" style="background:var(--kiyi);opacity:.5"></span>Kıyı bandı (300 m)</label>
     <label class="satir"><input type="checkbox" data-k="elektrik" checked><span class="renk cizgi" style="background:var(--elk)"></span>Enerji hatları ve trafo merkezleri</label>
     <label class="satir"><input type="checkbox" data-k="cdp"><span class="renk" style="background:linear-gradient(135deg,#e9ffde 50%,#9bd37f 50%)"></span>Çevre Düzeni Planı (canlı, Bakanlık)</label>
-    <label class="satir"><input type="checkbox" data-k="ilce" checked><span class="renk cizgi" style="background:#555"></span>İlçe sınırları</label>
+    <label class="satir"><input type="checkbox" data-k="ilce" checked><span class="renk cizgi" style="background:#222;box-shadow:0 0 0 1px #fff"></span>İlçe sınırları ve adları</label>
   </div>
 
   <div class="bolum">
@@ -156,6 +185,6 @@
 <button class="ac-dugme" onclick="panelGoster(true)">☰ Süz ve katmanlar</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="harita.js?v=6"></script>
+<script src="harita.js?v=8"></script>
 </body>
 </html>

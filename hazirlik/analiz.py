@@ -181,8 +181,8 @@ def kullanilamaz(m, k, c, tr):
     for kod, ad in KARANLIK:
         sec = maske[kod] & kalan
         kalan &= ~sec
-        sec = ndimage.binary_opening(ndimage.binary_closing(sec, iterations=2), iterations=1) & kara
-        for p in poligonla(sec, tr, 10, sade=75):
+        sec = ndimage.binary_closing(sec, iterations=1) & kara      # az yumuşatma: gerçek sınıra yakın
+        for p in poligonla(sec, tr, 3, sade=35):
             feats.append({"type": "Feature", "properties": {"kod": kod, "ad": ad}, "geometry": wgs_yuvarla(p, 4)})
     return feats
 
