@@ -55,6 +55,9 @@ function adayPopup(p, latlng) {
   </div>`;
 }
 
+const NEON = { A: "#39ff14", B: "#00f0ff" };
+harita.createPane("neon").style.zIndex = 450;
+const neonCizici = L.svg({ padding: 0.5, pane: "neon" });   // CSS animasyonu için ayrı SVG katmanı
 let adayVeri = null;
 const adayKatman = { A: L.layerGroup(), B: L.layerGroup() };
 
@@ -72,7 +75,8 @@ function adaylariCiz() {
     const s = f.properties.sinif;
     const gorunur = harita.hasLayer(adayKatman[s]);
     L.geoJSON(f, {
-      style: { color: RENK[s], weight: 1.2, fillColor: RENK[s], fillOpacity: s === "A" ? 0.6 : 0.5 },
+      renderer: neonCizici,
+      style: { color: NEON[s], weight: 2, fillColor: NEON[s], fillOpacity: 0.85, className: `neon neon-${s}` },
     })
       .on("click", (e) => L.popup().setLatLng(e.latlng).setContent(adayPopup(f.properties, e.latlng)).openOn(harita))
       .addTo(adayKatman[s]);

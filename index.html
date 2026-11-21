@@ -62,6 +62,18 @@
   .pop .baglanti { display: flex; gap: 6px; flex-wrap: wrap; }
   .pop .baglanti a { font-size: 12px; padding: 4px 8px; border-radius: 5px; background: var(--zemin); color: var(--metin); text-decoration: none; border: 1px solid var(--cizgi); }
   .pop .baglanti a:hover { border-color: var(--a); color: var(--a); }
+  /* Aday alanlar: tek katman (pane) yanıp söner, poligonlar tek tek değil — telefonda da akıcı */
+  .leaflet-neon-pane { animation: neon-yan 1.1s ease-in-out infinite alternate; }
+  .leaflet-neon-pane svg { filter: drop-shadow(0 0 3px rgba(255, 255, 255, .9)) drop-shadow(0 0 8px rgba(57, 255, 20, .8)); }
+  @keyframes neon-yan {
+    from { opacity: 1; }
+    to { opacity: .2; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .leaflet-neon-pane { animation: none; }
+  }
+  .renk.neon-A { background: #39ff14; box-shadow: 0 0 6px #39ff14; }
+  .renk.neon-B { background: #00f0ff; box-shadow: 0 0 6px #00f0ff; }
   .ac-dugme {
     display: none; position: absolute; z-index: 1001; left: 12px; top: 12px; padding: 10px 14px; border-radius: 8px;
     background: var(--panel); border: 1px solid var(--cizgi); box-shadow: var(--golge); font: 600 14px "IBM Plex Sans", sans-serif;
@@ -102,8 +114,8 @@
 
   <div class="bolum">
     <h2>Katmanlar</h2>
-    <label class="satir"><input type="checkbox" data-k="A" checked><span class="renk" style="background:var(--a)"></span>A — yol ve elektrik çok yakın</label>
-    <label class="satir"><input type="checkbox" data-k="B" checked><span class="renk" style="background:var(--b)"></span>B — yol yakın, elektrik orta mesafe</label>
+    <label class="satir"><input type="checkbox" data-k="A" checked><span class="renk neon-A"></span>A — yol ve elektrik çok yakın</label>
+    <label class="satir"><input type="checkbox" data-k="B" checked><span class="renk neon-B"></span>B — yol yakın, elektrik orta mesafe</label>
     <label class="satir"><input type="checkbox" data-k="kotu" checked><span class="renk" style="background:linear-gradient(90deg,#16301d 0 25%,#3b3519 25% 50%,#262626 50% 75%,#3a2a26 75%)"></span>Uygun olmayan alanlar (koyu)</label>
     <div class="kucuk" style="padding:0 0 6px 24px;line-height:1.6">
       <span class="renk" style="display:inline-block;vertical-align:middle;background:#3d0c14"></span> havalimanı, askeri
@@ -144,6 +156,6 @@
 <button class="ac-dugme" onclick="panelGoster(true)">☰ Süz ve katmanlar</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="harita.js?v=5"></script>
+<script src="harita.js?v=6"></script>
 </body>
 </html>
