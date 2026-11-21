@@ -18,5 +18,21 @@
   "tm_m": 6000,
   "koy_m": 2000
  },
- "min_alan_ha": 3
+ "min_alan_ha": 3,
+ "havalimani_tampon_m": 3000,
+ "askeri_tampon_m": 500,
+ "sehir_merkezi_tampon_m": 3000,
+ "merkez_ilceler": [
+  "Konak",
+  "Karşıyaka",
+  "Bornova",
+  "Buca",
+  "Bayraklı",
+  "Çiğli",
+  "Gaziemir",
+  "Balçova",
+  "Narlıdere",
+  "Karabağlar",
+  "Güzelbahçe"
+ ]
 }

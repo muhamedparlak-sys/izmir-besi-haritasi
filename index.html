@@ -106,6 +106,8 @@
     <label class="satir"><input type="checkbox" data-k="B" checked><span class="renk" style="background:var(--b)"></span>B — yol yakın, elektrik orta mesafe</label>
     <label class="satir"><input type="checkbox" data-k="kotu" checked><span class="renk" style="background:linear-gradient(90deg,#16301d 0 25%,#3b3519 25% 50%,#262626 50% 75%,#3a2a26 75%)"></span>Uygun olmayan alanlar (koyu)</label>
     <div class="kucuk" style="padding:0 0 6px 24px;line-height:1.6">
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#3d0c14"></span> havalimanı, askeri
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#1c1a33;margin-left:6px"></span> şehir merkezi<br>
       <span class="renk" style="display:inline-block;vertical-align:middle;background:#16301d"></span> orman, makilik
       <span class="renk" style="display:inline-block;vertical-align:middle;background:#3b3519;margin-left:6px"></span> mera<br>
       <span class="renk" style="display:inline-block;vertical-align:middle;background:#262626"></span> yerleşim, sanayi
@@ -124,8 +126,8 @@
     <details>
       <summary>Nasıl seçildi?</summary>
       <ul>
-        <li><b>Dışarıda bırakılan:</b> sit, tabiat ve yaban hayatı koruma alanları; olası büyük ovalar ve DSİ sulama alanları; kıyıdan 300 m; yerleşim alanları ve 300 m çevresi; göl/baraj ve 100 m çevresi; yüksek gerilim hattı altı (40 m); eğimi %15'ten fazla yerler; Çevre Düzeni Planı'nda tarım arazisi olmayan her yer (orman, mera, sanayi vb.).</li>
-        <li><b>Yol:</b> haritalı resmî yola (köy yolu ve üstü; tarla yolu hariç) en çok 250 m.</li>
+        <li><b>Dışarıda bırakılan:</b> havalimanları ve 3 km çevresi; askeri alanlar ve 500 m çevresi; il/ilçe merkezlerinin 3 km çevresi ve büyükşehir merkez ilçeleri (Konak, Karşıyaka, Bornova, Buca, Bayraklı, Çiğli, Gaziemir, Balçova, Narlıdere, Karabağlar, Güzelbahçe); sit, tabiat ve yaban hayatı koruma alanları; olası büyük ovalar ve DSİ sulama alanları; kıyıdan 300 m; yerleşim alanları ve 300 m çevresi; göl/baraj ve 100 m çevresi; yüksek gerilim hattı altı (40 m); eğimi %15'ten fazla yerler; Çevre Düzeni Planı'nda tarım arazisi olmayan her yer (orman, mera, sanayi vb.).</li>
+        <li><b>Yol:</b> haritalı yola (köy yolu ve üstü; tarla yolu hariç) en çok 250 m. Parselin <b>kadastral yola cephesi</b> olup olmadığı alana tıklayınca açılan TKGM parsel sorgusundan kontrol edilmeli.</li>
         <li><b>Elektrik A:</b> OG hattına ≤500 m, trafo merkezine ≤3 km ya da köye ≤1 km. <b>B:</b> sırasıyla 1,5 km / 6 km / 2 km.</li>
         <li>Alana tıklayınca mesafeler, eğim ve kot görünür.</li>
       </ul>
@@ -142,6 +144,6 @@
 <button class="ac-dugme" onclick="panelGoster(true)">☰ Süz ve katmanlar</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="harita.js?v=4"></script>
+<script src="harita.js?v=5"></script>
 </body>
 </html>

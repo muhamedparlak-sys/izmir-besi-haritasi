@@ -33,7 +33,32 @@ KRITER = {
     "elk_iyi": {"og_m": 500, "tm_m": 3000, "koy_m": 1000},
     "elk_orta": {"og_m": 1500, "tm_m": 6000, "koy_m": 2000},
     "min_alan_ha": 3,
+    "havalimani_tampon_m": 3000,   # kuş çarpması / mania; havalimanı sınırından
+    "askeri_tampon_m": 500,        # askeri alan sınırından (yasak bölge yaklaşık)
+    "sehir_merkezi_tampon_m": 3000,  # il/ilçe merkezi (city/town) noktasından
+    "merkez_ilceler": ["Konak", "Karşıyaka", "Bornova", "Buca", "Bayraklı", "Çiğli", "Gaziemir",
+                       "Balçova", "Narlıdere", "Karabağlar", "Güzelbahçe"],
 }
+
+
+def yasak_ve_merkez(k):
+    """Havalimanı, askeri alan ve şehir merkezi maskeleri (OSM + ilçe sınırı)."""
+    from katmanlar import ras, mesafe
+    K = KRITER
+    tr = Affine(*k["transform"])
+    shp = k["sinir"].shape
+    yasak = [e for e in osm("yasak") if e["type"] != "node"]
+    tag = lambda e: e.get("tags", {})
+    havalimani = [utm(g) for e in yasak if tag(e).get("aeroway") == "aerodrome" and (g := yol_geom(e)) is not None]
+    askeri = [utm(g) for e in yasak if tag(e).get("aeroway") != "aerodrome" and (g := yol_geom(e)) is not None]
+    hav = mesafe(ras([g.buffer(0) for g in havalimani], tr, shp)) <= K["havalimani_tampon_m"]
+    ask = mesafe(ras([g.buffer(0) for g in askeri], tr, shp)) <= K["askeri_tampon_m"]
+    merkez_nokta = [utm(yol_geom(e)) for e in osm("yerlesim")
+                    if e["type"] == "node" and tag(e).get("place") in ("city", "town")]
+    mer = mesafe(ras(merkez_nokta, tr, shp)) <= K["sehir_merkezi_tampon_m"]
+    ilce = [g for n, g in ilceler() if n in K["merkez_ilceler"]]
+    mer |= ras(ilce, tr, shp, all_touched=False)
+    return hav | ask, mer
 
 
 def olasi_ova(k, c):
@@ -61,6 +86,7 @@ def maskeler(k, c):
     m["yg"] = k["hv"]
     m["egim"] = k["egim"] > K["max_egim_yuzde"]
     m["cdp_disi"] = ~np.isin(c["l2"], [SINIF["tarim"], SINIF["thga"]])
+    m["yasak"], m["merkez"] = yasak_ve_merkez(k)
     return m
 
 
@@ -128,6 +154,8 @@ def wgs_yuvarla(g, nd=5):
 
 
 KARANLIK = [  # (kod, ad) — öncelik sırası: bir hücre ilk uyan sınıfa girer
+    ("yasak", "Havalimanı (3 km) ve askeri alan (500 m)"),
+    ("merkez", "Şehir merkezi ve merkez ilçeler"),
     ("yerlesim", "Yerleşim, sanayi ve çevresi"),
     ("orman", "Orman ve makilik"),
     ("mera", "Mera ve çayır"),
@@ -141,6 +169,8 @@ def kullanilamaz(m, k, c, tr):
     kara = k["sinir"] & (k["dem"] > 0)
     kalan = kara.copy()
     maske = {
+        "yasak": m["yasak"],
+        "merkez": m["merkez"],
         "yerlesim": m["yerlesim"],
         "orman": c["l2"] == SINIF["orman"],
         "mera": c["l2"] == SINIF["mera"],

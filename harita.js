@@ -1,5 +1,5 @@
 /* İzmir besi çiftliği aday alanları — Leaflet haritası */
-const KOYU = { yerlesim: "#262626", orman: "#16301d", mera: "#3b3519", egim: "#3a2a26", diger: "#2c3138" };
+const KOYU = { yasak: "#3d0c14", merkez: "#1c1a33", yerlesim: "#262626", orman: "#16301d", mera: "#3b3519", egim: "#3a2a26", diger: "#2c3138" };
 const RENK = { A: "#1d6b38", B: "#8cc56f", sit: "#c8463c", ova: "#e7b622", kiyi: "#3b7fc4", elk: "#7a3cc4" };
 const CDP_WMS = "https://tucbs-public-api.csb.gov.tr/csb_cdp_im_wms";
 
@@ -40,13 +40,14 @@ function adayPopup(p, latlng) {
     <h3>Aday ${p.no} · ${p.ilce}</h3>
     <div class="kucuk">${sayi(p.alan_ha)} hektar · ort. eğim %${p.egim_ort} · kot ~${sayi(p.kot_m)} m</div>
     <table>
-      <tr><td>Resmî yola</td><td>${km(p.yol_m)}</td></tr>
+      <tr><td>Haritalı yola</td><td>${km(p.yol_m)}</td></tr>
       <tr><td>OG elektrik hattına</td><td>${km(p.og_hat_m)}</td></tr>
       <tr><td>Trafo merkezine</td><td>${km(p.trafo_merkezi_m)}</td></tr>
       <tr><td>Köy/mahalle merkezine</td><td>${km(p.koy_m)}</td></tr>
       <tr><td>YG hattına</td><td>${km(p.yg_hat_m)}</td></tr>
       <tr><td>Kıyıya</td><td>${km(p.kiyi_m)}</td></tr>
     </table>
+    <div class="kucuk" style="margin-bottom:6px">Kadastral yol cephesini TKGM'den parsel parsel kontrol edin.</div>
     <div class="baglanti">
       <a href="https://parselsorgu.tkgm.gov.tr/#ara/cografi/${lat}/${lng}" target="_blank" rel="noopener">TKGM parsel</a>
       <a href="https://www.google.com/maps?q=${lat},${lng}&t=k" target="_blank" rel="noopener">Google Haritalar</a>
