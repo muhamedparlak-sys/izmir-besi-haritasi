@@ -127,6 +127,36 @@ def wgs_yuvarla(g, nd=5):
     return d
 
 
+KARANLIK = [  # (kod, ad) — öncelik sırası: bir hücre ilk uyan sınıfa girer
+    ("yerlesim", "Yerleşim, sanayi ve çevresi"),
+    ("orman", "Orman ve makilik"),
+    ("mera", "Mera ve çayır"),
+    ("egim", "Dik yamaç (eğim > %15)"),
+    ("diger", "Su, YG hattı ve planda tarım dışı alan"),
+]
+
+
+def kullanilamaz(m, k, c, tr):
+    """Besi çiftliğine yaramayan kara alanları (sit/ova/kıyı ayrı katmanlarda)."""
+    kara = k["sinir"] & (k["dem"] > 0)
+    kalan = kara.copy()
+    maske = {
+        "yerlesim": m["yerlesim"],
+        "orman": c["l2"] == SINIF["orman"],
+        "mera": c["l2"] == SINIF["mera"],
+        "egim": m["egim"],
+        "diger": m["su"] | m["yg"] | m["cdp_disi"],
+    }
+    feats = []
+    for kod, ad in KARANLIK:
+        sec = maske[kod] & kalan
+        kalan &= ~sec
+        sec = ndimage.binary_opening(ndimage.binary_closing(sec, iterations=2), iterations=1) & kara
+        for p in poligonla(sec, tr, 10, sade=75):
+            feats.append({"type": "Feature", "properties": {"kod": kod, "ad": ad}, "geometry": wgs_yuvarla(p, 4)})
+    return feats
+
+
 def main():
     k = dict(np.load(ARA / "katmanlar.npz"))
     c = dict(np.load(ARA / "cdp.npz"))
@@ -159,6 +189,8 @@ def main():
         mask = ndimage.binary_closing(m[ad] & k["sinir"], iterations=1)
         ps = poligonla(mask, tr, 5, sade=60)
         yaz(ad, [{"type": "Feature", "properties": {"ad": etiket}, "geometry": wgs_yuvarla(p, 4)} for p in ps])
+
+    yaz("kullanilamaz", kullanilamaz(m, k, c, tr))
 
     elk = osm("elektrik")
     ef = []

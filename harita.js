@@ -1,4 +1,5 @@
 /* İzmir besi çiftliği aday alanları — Leaflet haritası */
+const KOYU = { yerlesim: "#262626", orman: "#16301d", mera: "#3b3519", egim: "#3a2a26", diger: "#2c3138" };
 const RENK = { A: "#1d6b38", B: "#8cc56f", sit: "#c8463c", ova: "#e7b622", kiyi: "#3b7fc4", elk: "#7a3cc4" };
 const CDP_WMS = "https://tucbs-public-api.csb.gov.tr/csb_cdp_im_wms";
 
@@ -113,9 +114,13 @@ async function yukle(ad) {
 
 async function basla() {
   try {
-    const [aday, sit, ova, kiyi, elk, ilce] = await Promise.all(
-      ["adaylar", "sit", "ova", "kiyi", "elektrik", "sinir"].map(yukle),
+    const [aday, sit, ova, kiyi, elk, ilce, kotu] = await Promise.all(
+      ["adaylar", "sit", "ova", "kiyi", "elektrik", "sinir", "kullanilamaz"].map(yukle),
     );
+    katman.kotu = L.geoJSON(kotu, {
+      style: (f) => ({ stroke: false, fillColor: KOYU[f.properties.kod], fillOpacity: 0.78 }),
+      onEachFeature: (f, l) => l.bindTooltip(`Uygun değil: ${f.properties.ad}`, { sticky: true }),
+    });
     const alanStil = (renk, op) => ({ color: renk, weight: 0.8, fillColor: renk, fillOpacity: op, interactive: true });
     const etiketli = (f, l) => l.bindTooltip(f.properties.ad, { sticky: true });
 
@@ -165,7 +170,7 @@ async function basla() {
 }
 
 function katmanSirasi() {
-  ["ova", "kiyi", "sit", "elektrik", "B", "A"].forEach((k) => {
+  ["kotu", "ova", "kiyi", "sit", "elektrik", "B", "A"].forEach((k) => {
     const l = katman[k];
     if (l && harita.hasLayer(l)) l.eachLayer?.((x) => x.bringToFront?.());
   });

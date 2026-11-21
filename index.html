@@ -104,6 +104,14 @@
     <h2>Katmanlar</h2>
     <label class="satir"><input type="checkbox" data-k="A" checked><span class="renk" style="background:var(--a)"></span>A — yol ve elektrik çok yakın</label>
     <label class="satir"><input type="checkbox" data-k="B" checked><span class="renk" style="background:var(--b)"></span>B — yol yakın, elektrik orta mesafe</label>
+    <label class="satir"><input type="checkbox" data-k="kotu" checked><span class="renk" style="background:linear-gradient(90deg,#16301d 0 25%,#3b3519 25% 50%,#262626 50% 75%,#3a2a26 75%)"></span>Uygun olmayan alanlar (koyu)</label>
+    <div class="kucuk" style="padding:0 0 6px 24px;line-height:1.6">
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#16301d"></span> orman, makilik
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#3b3519;margin-left:6px"></span> mera<br>
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#262626"></span> yerleşim, sanayi
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#3a2a26;margin-left:6px"></span> dik yamaç<br>
+      <span class="renk" style="display:inline-block;vertical-align:middle;background:#2c3138"></span> su, YG hattı, planda tarım dışı
+    </div>
     <label class="satir"><input type="checkbox" data-k="sit" checked><span class="renk" style="background:var(--sit);opacity:.55"></span>Sit ve koruma alanları</label>
     <label class="satir"><input type="checkbox" data-k="ova" checked><span class="renk" style="background:var(--ova);opacity:.6"></span>Olası büyük ova / sulama alanı</label>
     <label class="satir"><input type="checkbox" data-k="kiyi" checked><span class="renk" style="background:var(--kiyi);opacity:.5"></span>Kıyı bandı (300 m)</label>
@@ -134,6 +142,6 @@
 <button class="ac-dugme" onclick="panelGoster(true)">☰ Süz ve katmanlar</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="harita.js?v=3"></script>
+<script src="harita.js?v=4"></script>
 </body>
 </html>
